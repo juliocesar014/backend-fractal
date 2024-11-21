@@ -6,17 +6,46 @@ from .models import User
 from .schemas import UserSchema, CreateUserSchema, UpdateUserSchema
 from datetime import datetime
 import logging
+from ninja import Query
+from django.core.paginator import Paginator, EmptyPage
+from typing import Optional
 
 router = NinjaAPI()
 logger = logging.getLogger(__name__)
 
 
 @router.get("/users", response={200: list[UserSchema], 500: dict})
-def list_users(request):
-    """List all users."""
+def list_users(
+    request,
+    search: Optional[str] = Query(None),
+    order: Optional[str] = Query(None),
+    page: int = Query(1),
+    page_size: int = Query(10),
+):
+    """
+    List all users with optional search, sorting, and pagination.
+    """
     try:
         users = User.objects.all()
-        return users
+
+        if search:
+            users = users.filter(username__icontains=search)
+
+        if order:
+            valid_order_fields = ["username", "email",
+                                  "role", "-username", "-email", "-role"]
+            if order in valid_order_fields:
+                users = users.order_by(order)
+            else:
+                return 400, {"error": f"Invalid order field. Allowed: {', '.join(valid_order_fields)}"}
+
+        paginator = Paginator(users, page_size)
+        try:
+            paginated_users = paginator.page(page)
+        except EmptyPage:
+            return 400, {"error": "Page number out of range."}
+
+        return [UserSchema.from_orm(user) for user in paginated_users]
     except Exception as e:
         logger.error(f"Error while listing users: {e}")
         return 500, {"error": "An error occurred while listing users."}
