@@ -86,3 +86,27 @@ class CreateQuestionSchema(BaseModel):
 
 class UpdateQuestionSchema(BaseModel):
     text: Optional[str] = Field(None, max_length=1000)
+
+
+class ChoiceSchema(BaseModel):
+    id: int
+    question_id: int
+    text: str
+    is_correct: bool
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        orm_mode = True
+        from_attributes = True
+
+
+class CreateChoiceSchema(BaseModel):
+    question_id: int
+    text: str = Field(..., max_length=255)
+    is_correct: bool
+
+
+class UpdateChoiceSchema(BaseModel):
+    text: Optional[str] = Field(None, max_length=255)
+    is_correct: Optional[bool]
