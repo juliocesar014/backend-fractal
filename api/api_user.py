@@ -10,11 +10,11 @@ from ninja import Query
 from django.core.paginator import Paginator, EmptyPage
 from typing import Optional
 
-router = NinjaAPI()
+router = NinjaAPI(urls_namespace="users")
 logger = logging.getLogger(__name__)
 
 
-@router.get("/users", response={200: list[UserSchema], 500: dict})
+@router.get("/", response={200: list[UserSchema], 500: dict})
 def list_users(
     request,
     search: Optional[str] = Query(None),
@@ -51,7 +51,7 @@ def list_users(
         return 500, {"error": "An error occurred while listing users."}
 
 
-@router.get("/users/{user_id}/", response={200: UserSchema, 404: dict, 500: dict})
+@router.get("/{user_id}/", response={200: UserSchema, 404: dict, 500: dict})
 def get_user(request, user_id: int):
     """Retrieve a user by ID."""
     try:
@@ -64,7 +64,7 @@ def get_user(request, user_id: int):
         return 500, {"error": "An error occurred while retrieving the user."}
 
 
-@router.post("/users", response={201: UserSchema, 400: dict, 500: dict})
+@router.post("/", response={201: UserSchema, 400: dict, 500: dict})
 def create_user(request, data: CreateUserSchema):
     """Create a new user with role validation."""
     if data.role.upper() not in [User.RoleTypes.ADMIN.value.upper(), User.RoleTypes.PARTICIPANT.value.upper()]:
@@ -88,7 +88,7 @@ def create_user(request, data: CreateUserSchema):
         return 500, {"error": "An error occurred while creating the user."}
 
 
-@router.put("/users/{user_id}/", response={200: UserSchema, 400: dict, 404: dict, 500: dict})
+@router.put("/{user_id}/", response={200: UserSchema, 400: dict, 404: dict, 500: dict})
 def update_user(request, user_id: int, data: UpdateUserSchema):
     """Update a user's profile and other fields."""
     try:
@@ -108,7 +108,7 @@ def update_user(request, user_id: int, data: UpdateUserSchema):
         return 500, {"error": "An error occurred while updating the user."}
 
 
-@router.delete("/users/{user_id}/", response={200: str, 404: dict, 500: dict})
+@router.delete("/{user_id}/", response={200: str, 404: dict, 500: dict})
 def delete_user(request, user_id: int):
     """Delete a user."""
     try:

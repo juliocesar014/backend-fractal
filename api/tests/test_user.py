@@ -27,7 +27,7 @@ def create_user(db):
 @pytest.mark.django_db
 def test_list_users(client, create_users):
     """Test listing all users."""
-    url = "/api/users"
+    url = "/api/users/"
     response = client.get(url)
     assert response.status_code == 200
     data = response.json()
@@ -37,7 +37,7 @@ def test_list_users(client, create_users):
 @pytest.mark.django_db
 def test_list_users_search(client, create_users):
     """Test listing users with search functionality."""
-    url = "/api/users?search=user"
+    url = "/api/users/?search=user"
     response = client.get(url)
     assert response.status_code == 200
     data = response.json()
@@ -50,7 +50,7 @@ def test_list_users_search(client, create_users):
 @pytest.mark.django_db
 def test_list_users_order(client, create_users):
     """Test listing users with ordering."""
-    url = "/api/users?order=username"
+    url = "/api/users/?order=username"
     response = client.get(url)
     assert response.status_code == 200
     data = response.json()
@@ -61,7 +61,7 @@ def test_list_users_order(client, create_users):
 @pytest.mark.django_db
 def test_list_users_pagination(client, create_users):
     """Test listing users with pagination."""
-    url = "/api/users?page=1&page_size=2"
+    url = "/api/users/?page=1&page_size=2"
     response = client.get(url)
     assert response.status_code == 200
     data = response.json()
@@ -69,7 +69,7 @@ def test_list_users_pagination(client, create_users):
     assert data[0]["username"] == "admin"
     assert data[1]["username"] == "user1"
 
-    url = "/api/users?page=2&page_size=2"
+    url = "/api/users/?page=2&page_size=2"
     response = client.get(url)
     assert response.status_code == 200
     data = response.json()
@@ -92,7 +92,7 @@ def test_get_user(client, create_user):
 @pytest.mark.django_db
 def test_create_user(client):
     """Test creating a new user."""
-    url = "/api/users"
+    url = "/api/users/"
     payload = {
         "username": "user",
         "email": "user@test.com",
@@ -111,7 +111,7 @@ def test_create_user(client):
 @pytest.mark.django_db
 def test_create_user_duplicate_username(client, create_user):
     """Test creating a user with duplicate username."""
-    url = "/api/users"
+    url = "/api/users/"
     payload = {
         "username": "testuser",
         "email": "newemail@test.com",

@@ -1,5 +1,5 @@
 from ninja import Schema
-from pydantic import EmailStr
+from pydantic import EmailStr, BaseModel, Field
 from typing import Optional
 from datetime import datetime
 
@@ -38,3 +38,30 @@ class UpdateUserSchema(Schema):
     last_name: Optional[str]
     email: Optional[EmailStr]
     role: Optional[str]
+
+
+class ExamSchema(BaseModel):
+    id: int
+    name: str
+    description: Optional[str]
+    start_date: datetime
+    end_date: datetime
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class CreateExamSchema(BaseModel):
+    name: str = Field(..., max_length=255)
+    description: Optional[str]
+    start_date: datetime
+    end_date: datetime
+
+
+class UpdateExamSchema(BaseModel):
+    name: Optional[str] = Field(None, max_length=255)
+    description: Optional[str]
+    start_date: Optional[datetime]
+    end_date: Optional[datetime]
