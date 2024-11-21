@@ -7,6 +7,7 @@ from api.api_choice import router as choice_router
 from api.api_participants import router as participant_router
 from api.api_answer import router as answer_router
 from api.api_correction import router as correction_router
+from api.api_ranking import router as ranking_router
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -17,4 +18,5 @@ urlpatterns = [
     path("api/participants/", participant_router.urls),
     path("api/answers/", answer_router.urls),
     path("api/corrections/", correction_router.urls),
+    path("api/rankings/", ranking_router.urls),
 ]
