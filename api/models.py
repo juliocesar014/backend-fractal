@@ -78,3 +78,22 @@ class Answer(models.Model):
 
     def __str__(self):
         return f"Participant {self.participant.user.username} answered '{self.choice.text}' for question '{self.question.text} with role {self.participant.user.role}'"
+
+
+class Result(models.Model):
+    participant = models.ForeignKey(
+        Participant, on_delete=models.CASCADE, related_name="results"
+    )
+    exam = models.ForeignKey(
+        Exam, on_delete=models.CASCADE, related_name="results"
+    )
+    score = models.FloatField(default=0.0)
+    max_score = models.FloatField(default=0.0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ("participant", "exam")
+
+    def __str__(self):
+        return f"Result for {self.participant.user.username} in {self.exam.name}"
