@@ -1,3 +1,4 @@
+from pydantic import BaseModel, Field
 from ninja import Schema
 from pydantic import EmailStr, BaseModel, Field
 from typing import Optional
@@ -65,3 +66,23 @@ class UpdateExamSchema(BaseModel):
     description: Optional[str]
     start_date: Optional[datetime]
     end_date: Optional[datetime]
+
+
+class QuestionSchema(BaseModel):
+    id: int
+    exam_id: int
+    text: str
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class CreateQuestionSchema(BaseModel):
+    exam_id: int
+    text: str = Field(..., max_length=1000)
+
+
+class UpdateQuestionSchema(BaseModel):
+    text: Optional[str] = Field(None, max_length=1000)
