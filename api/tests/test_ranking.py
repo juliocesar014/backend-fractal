@@ -96,3 +96,58 @@ def test_get_ranking_invalid_exam(client):
     response = client.get(url)
     assert response.status_code == 404
     assert "Exam not found." in response.json()["error"]
+
+
+@pytest.mark.django_db
+def test_ranking_with_pagination(client, create_results, create_exam):
+    """Test ranking with pagination."""
+    url = f"/api/rankings/{create_exam.id}/?page=1&page_size=2"
+    response = client.get(url)
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data) == 2
+    assert data[0]["username"] == "user2"
+    assert data[1]["username"] == "participant_user"
+
+    url = f"/api/rankings/{create_exam.id}/?page=2&page_size=2"
+    response = client.get(url)
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data) == 1
+    assert data[0]["username"] == "user3"
+
+
+@pytest.mark.django_db
+def test_ranking_with_ordering(client, create_results, create_exam):
+    """Test ranking with different ordering options."""
+    url = f"/api/rankings/{create_exam.id}/?order=username"
+    response = client.get(url)
+    assert response.status_code == 200
+    data = response.json()
+    usernames = [r["username"] for r in data]
+    assert usernames == ["participant_user", "user2", "user3"]
+
+    url = f"/api/rankings/{create_exam.id}/?order=score"
+    response = client.get(url)
+    assert response.status_code == 200
+    data = response.json()
+    usernames = [r["username"] for r in data]
+    assert usernames == ["user2", "participant_user", "user3"]
+
+
+@pytest.mark.django_db
+def test_invalid_ordering_field(client, create_exam):
+    """Test ranking with an invalid ordering field."""
+    url = f"/api/rankings/{create_exam.id}/?order=invalid_field"
+    response = client.get(url)
+    assert response.status_code == 400
+    assert "Invalid order field" in response.json()["error"]
+
+
+@pytest.mark.django_db
+def test_ranking_pagination_out_of_range(client, create_results, create_exam):
+    """Test ranking pagination with a page number out of range."""
+    url = f"/api/rankings/{create_exam.id}/?page=10&page_size=2"
+    response = client.get(url)
+    assert response.status_code == 400
+    assert "Page number out of range." in response.json()["error"]
