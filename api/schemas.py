@@ -130,3 +130,26 @@ class CreateParticipantSchema(BaseModel):
 
 class UpdateParticipantSchema(BaseModel):
     exam_ids: Optional[list[int]] = []
+
+
+class AnswerSchema(BaseModel):
+    id: int
+    participant_id: int
+    question_id: int
+    choice_id: int
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        orm_mode = True
+        from_attributes = True
+
+
+class CreateAnswerSchema(BaseModel):
+    participant_id: int
+    question_id: int
+    choice_id: int
+
+
+class UpdateAnswerSchema(BaseModel):
+    choice_id: int

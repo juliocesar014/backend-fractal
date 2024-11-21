@@ -53,10 +53,28 @@ class Choice(models.Model):
 
 
 class Participant(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="participant")
+    user = models.OneToOneField(
+        User, on_delete=models.CASCADE, related_name="participant")
     exams = models.ManyToManyField(Exam, related_name="participants")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.user.username} (Participant) - {self.user.role}"
+
+
+class Answer(models.Model):
+    participant = models.ForeignKey(
+        Participant, on_delete=models.CASCADE, related_name="answers")
+    question = models.ForeignKey(
+        Question, on_delete=models.CASCADE, related_name="answers")
+    choice = models.ForeignKey(
+        Choice, on_delete=models.CASCADE, related_name="answers")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ("participant", "question")
+
+    def __str__(self):
+        return f"Participant {self.participant.user.username} answered '{self.choice.text}' for question '{self.question.text} with role {self.participant.user.role}'"
