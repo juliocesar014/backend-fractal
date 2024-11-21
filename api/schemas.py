@@ -28,7 +28,7 @@ class CreateUserSchema(Schema):
 
     @staticmethod
     def validate_role(role: str):
-        if role not in [User.RoleTypes.ADMIN, User.RoleTypes.PARTICIPANT]:
+        if role not in User.RoleTypes.values:
             raise ValueError(
                 "Invalid Role. Role must be 'admin' or 'participant'")
         return role
@@ -110,3 +110,23 @@ class CreateChoiceSchema(BaseModel):
 class UpdateChoiceSchema(BaseModel):
     text: Optional[str] = Field(None, max_length=255)
     is_correct: Optional[bool]
+
+
+class ParticipantSchema(BaseModel):
+    id: int
+    user_id: int
+    exams: list[ExamSchema]
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class CreateParticipantSchema(BaseModel):
+    user_id: int
+    exam_ids: Optional[list[int]] = []
+
+
+class UpdateParticipantSchema(BaseModel):
+    exam_ids: Optional[list[int]] = []

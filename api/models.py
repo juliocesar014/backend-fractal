@@ -50,3 +50,13 @@ class Choice(models.Model):
 
     def __str__(self):
         return f"{self.text} (Correct: {self.is_correct})"
+
+
+class Participant(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="participant")
+    exams = models.ManyToManyField(Exam, related_name="participants")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.user.username} (Participant) - {self.user.role}"
