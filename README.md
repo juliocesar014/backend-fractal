@@ -6,3 +6,7 @@ poetry add --dev flake8
 
 
 *Note que eu adicionei autenticacao JWT apenas em Answer e em Exames.
+
+
+docker-compose build
+docker-compose up
