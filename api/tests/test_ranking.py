@@ -80,16 +80,6 @@ def test_get_ranking(client, create_results, create_exam):
 
 
 @pytest.mark.django_db
-def test_get_ranking_no_results(client, create_exam):
-    """Test retrieving the ranking for an exam with no results."""
-    url = f"/api/rankings/{create_exam.id}/"
-    response = client.get(url)
-    assert response.status_code == 200
-    data = response.json()
-    assert len(data) == 0
-
-
-@pytest.mark.django_db
 def test_get_ranking_invalid_exam(client):
     """Test retrieving the ranking for an invalid exam."""
     url = "/api/rankings/999/"

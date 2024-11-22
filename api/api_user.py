@@ -9,12 +9,15 @@ import logging
 from ninja import Query
 from django.core.paginator import Paginator, EmptyPage
 from typing import Optional
+from ninja.decorators import decorate_view
+from django.views.decorators.cache import cache_page
 
 router = NinjaAPI(urls_namespace="users")
 logger = logging.getLogger(__name__)
 
 
 @router.get("/", response={200: list[UserSchema], 500: dict})
+@decorate_view(cache_page(60*15))
 def list_users(
     request,
     search: Optional[str] = Query(None),

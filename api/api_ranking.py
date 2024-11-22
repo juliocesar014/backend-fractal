@@ -4,12 +4,15 @@ from django.db.models import F
 from django.core.paginator import Paginator, EmptyPage
 from typing import Optional
 import logging
+from ninja.decorators import decorate_view
+from django.views.decorators.cache import cache_page
 
 router = NinjaAPI(urls_namespace="rankings")
 logger = logging.getLogger(__name__)
 
 
 @router.get("/{exam_id}/", response={200: list[dict], 400: dict, 404: dict, 500: dict})
+@decorate_view(cache_page(60*15))
 def get_ranking(
     request,
     exam_id: int,
