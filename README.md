@@ -53,6 +53,8 @@ Ao inicializar o Docker, os dados iniciais são automaticamente carregados a par
 - Escolhas
 - Participantes
 
+**Obs: Todos usuários da fixutre tem o password: @dmin123**
+
 ---
 
 ## **Rodando os Testes**
