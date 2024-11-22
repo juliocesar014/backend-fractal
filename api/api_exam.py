@@ -1,14 +1,31 @@
+import logging
 from django.db import IntegrityError
 from django.http import Http404
 from ninja import NinjaAPI, Query
 from django.core.paginator import Paginator, EmptyPage
 from django.shortcuts import get_object_or_404
 from typing import Optional
-from .models import Exam
+
+from api.api_auth import AuthBearer
+from .models import Exam, Participant
 from .schemas import ExamSchema, CreateExamSchema, UpdateExamSchema
-from datetime import datetime
+from typing import List
+
 
 router = NinjaAPI(urls_namespace="exams")
+logger = logging.getLogger(__name__)
+
+
+@router.get("/me/", response=List[ExamSchema], auth=AuthBearer())
+def list_participant_exams(request):
+    """
+    List all exams the authenticated participant is enrolled in.
+    """
+    logger.debug(f"Authenticated user: {request.user}")
+    participant = get_object_or_404(Participant, user=request.user)
+    exams = Exam.objects.filter(participants=participant)
+    logger.debug(f"Exams retrieved: {exams}")
+    return exams
 
 
 @router.get("/", response={200: list[ExamSchema], 500: dict})

@@ -2,6 +2,8 @@ from ninja import NinjaAPI
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 from ninja import Schema
+from ninja.security import HttpBearer
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 router = NinjaAPI(urls_namespace="auth")
 
@@ -18,6 +20,17 @@ class AuthSchema(Schema):
 
 class RefreshTokenSchema(Schema):
     refresh: str
+
+
+class AuthBearer(HttpBearer):
+    def authenticate(self, request, token):
+        try:
+            validated_token = JWTAuthentication().get_validated_token(token)
+            user = JWTAuthentication().get_user(validated_token)
+            request.user = user
+            return user
+        except Exception:
+            return None
 
 
 @router.post("/login", response={200: TokenSchema, 401: dict})

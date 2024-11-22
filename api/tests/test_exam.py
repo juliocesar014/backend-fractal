@@ -1,5 +1,6 @@
 import pytest
-from api.models import Exam
+from api.models import Exam, Participant, User
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
 @pytest.fixture
@@ -26,6 +27,38 @@ def create_exam(db):
         start_date="2024-01-01T10:00:00Z",
         end_date="2024-01-02T10:00:00Z",
     )
+
+
+@pytest.fixture
+def create_user_with_exams(db):
+    """Create a user with exams."""
+    from api.models import Exam, Participant, User
+    user = User.objects.create_user(
+        username="participant_user",
+        email="participant@example.com",
+        password="password123",
+        role="participant",
+    )
+    participant = Participant.objects.create(user=user)
+    exams = Exam.objects.bulk_create([
+        Exam(name="Exam 1", description="Description 1",
+             start_date="2024-01-01T10:00:00Z", end_date="2024-01-02T10:00:00Z"),
+        Exam(name="Exam 2", description="Description 2",
+             start_date="2024-02-01T10:00:00Z", end_date="2024-02-02T10:00:00Z"),
+    ])
+    participant.exams.set(exams)
+    return {"user": user, "participant": participant, "exams": exams}
+
+
+@pytest.fixture
+def get_token(create_user_with_exams):
+    """Generate JWT token for a user."""
+    user = create_user_with_exams["user"]
+    refresh = RefreshToken.for_user(user)
+    return {
+        "access": str(refresh.access_token),
+        "refresh": str(refresh),
+    }
 
 
 @pytest.mark.django_db
@@ -72,7 +105,6 @@ def test_list_exams_pagination(client, create_exams):
     assert len(data) == 2
     assert data[0]["name"] == "Exam 1"
     assert data[1]["name"] == "Exam 2"
-
 
 
 @pytest.mark.django_db
@@ -152,3 +184,29 @@ def test_delete_exam_not_found(client):
     response = client.delete(url)
     assert response.status_code == 404
     assert response.json()["error"] == "Exam not found."
+
+
+@pytest.mark.django_db
+def test_list_my_exams(client, create_user_with_exams, get_token):
+    """Test listing exams for the authenticated participant."""
+    token = get_token["access"]
+    headers = {"HTTP_AUTHORIZATION": f"Bearer {token}"}
+    url = "/api/exams/me/"
+
+    response = client.get(url, **headers)
+
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data) == len(create_user_with_exams["exams"])
+    exam_names = [exam["name"] for exam in data]
+    assert "Exam 1" in exam_names
+    assert "Exam 2" in exam_names
+
+
+@pytest.mark.django_db
+def test_list_my_exams_unauthorized(client):
+    """Test listing exams without authentication."""
+    url = "/api/exams/me/"
+    response = client.get(url)
+    assert response.status_code == 401
+    assert response.json().get("detail") == "Unauthorized"
